@@ -52,10 +52,10 @@ DEFAULT_CONFIG = {
     "first_run": True,
     "session_path": "whatsapp_session",
     "xpaths": {
-        "message_box": '//*[@id="main"]/footer/div[1]/div/span/div/div[2]/div[1]/div[2]/div/p',
-        "message_area_click": '//*[@id="main"]/footer/div[1]/div/span/div/div[2]/div[1]/div[2]',
-        "send_button": '//*[@id="main"]/footer/div[1]/div/span/div/div[2]/div[2]/button',
-        "chat_title": '//div[@data-testid="conversation-header-content"]//span'
+        "message_box": '//div[@contenteditable="true" and @data-tab="10"]',
+        "message_area_click": '//div[@contenteditable="true" and @data-tab="10"]/ancestor::div[contains(@class, "lexical-rich-text-input")]',
+        "send_button": '//button[@aria-label="Send" or .//span[@data-icon="send"]]',
+        "chat_title": '//div[@id="main"]//header//div[@role="button"]//span[@dir="auto"]'
     }
 }
 
@@ -236,9 +236,9 @@ class Browser(QThread):
             self.status_update.emit("Loading WhatsApp Web...", "info")
             self.qr_ready.emit()
             
-            # Wait for login to complete by looking for the search box
+            # Wait for login to complete by looking for the search box or pane-side
             WebDriverWait(self.driver, self.wait_time * 2).until(
-                EC.presence_of_element_located((By.XPATH, '//div[@contenteditable="true" and @data-tab="3"]'))
+                EC.presence_of_element_located((By.XPATH, '//div[@id="pane-side"] | //div[@contenteditable="true" and @data-tab="3"]'))
             )
             self.status_update.emit("Successfully logged in!", "success")
             self.logged_in.emit(True)
@@ -351,17 +351,14 @@ class MessageSender(QThread):
             return False
             
         try:
-            # Find and click the message area
-            message_area = WebDriverWait(self.driver, 5).until(
-                EC.element_to_be_clickable((By.XPATH, self.config["xpaths"]["message_area_click"]))
-            )
-            message_area.click()
-            
             # Find the text input element
             message_box = WebDriverWait(self.driver, 5).until(
                 EC.presence_of_element_located((By.XPATH, self.config["xpaths"]["message_box"]))
             )
             
+            # Click the message area
+            message_box.click()
+
             # Clear any existing text
             message_box.clear()
             
