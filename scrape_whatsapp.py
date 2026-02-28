@@ -15,7 +15,7 @@ def main():
 
     print("Please scan the QR code to log in.")
     print("Waiting 30 seconds for you to scan and the page to load...")
-    time.sleep(30)
+    time.sleep(60)
 
     print("Saving the page source to 'whatsapp_source.html'...")
     with open("whatsapp_source.html", "w", encoding="utf-8") as f:
